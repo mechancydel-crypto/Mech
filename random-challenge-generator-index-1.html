@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Random Challenge Generator</title>
+<style>
+:root{--bg:#f7f6f1;--ink:#111;--card:#fff;--purple:#b99aff;--cyan:#69e8ff;--orange:#ff9b54;--yellow:#ffe06b;--green:#8ee68e}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Arial,sans-serif;font-weight:700}button{font:inherit;cursor:pointer}
+header{position:sticky;top:0;z-index:5;background:#fff;border-bottom:4px solid #111;padding:14px;display:flex;align-items:center;justify-content:space-between}
+header small{display:block;font-size:10px;opacity:.6}.logo{font-size:28px}
+main{max-width:1050px;margin:auto;padding:20px 16px 100px}.hero{background:var(--purple);border:5px solid #111;border-radius:30px;padding:25px;box-shadow:8px 8px #111}.hero h1{font-size:clamp(32px,7vw,65px);line-height:.9;margin:10px 0}.hero p{font-size:17px}
+.stats,.grid{display:grid;gap:15px}.stats{grid-template-columns:repeat(4,1fr);margin:20px 0}.grid{grid-template-columns:repeat(2,1fr)}.card{background:var(--card);border:4px solid #111;border-radius:24px;padding:20px;box-shadow:6px 6px #111}.stat b{display:block;font-size:28px}.cat:nth-child(1){background:var(--cyan)}.cat:nth-child(2){background:var(--purple)}.cat:nth-child(3){background:var(--orange)}.cat:nth-child(4){background:var(--green)}.cat:nth-child(5){background:var(--yellow)}
+.btn{border:3px solid #111;border-radius:14px;padding:12px 16px;background:#fff;margin:4px}.dark{background:#111;color:#fff}.tag{display:inline-block;border:3px solid #111;border-radius:99px;padding:8px 12px;background:#fff;margin:3px}.progress{height:14px;border:3px solid #111;border-radius:20px;background:#fff;overflow:hidden}.progress i{display:block;height:100%;background:#111;width:0}
+.question{background:#fff;border:5px solid #111;border-radius:28px;padding:22px;box-shadow:8px 8px #111;max-width:800px;margin:20px auto}.question img{width:100%;border:3px solid #111;border-radius:18px;margin:10px 0}.options{display:grid;grid-template-columns:1fr 1fr;gap:12px}.option{text-align:left;border:4px solid #111;border-radius:16px;padding:16px;background:#fff}.correct{background:var(--green)!important}.wrong{background:#ffaaaa!important}
+.bottom{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:4px solid #111;display:flex;justify-content:center;gap:4px;z-index:10}.bottom button{border:0;background:transparent;padding:9px 15px}.bottom span{display:block;font-size:10px}
+.splash{position:fixed;inset:0;background:linear-gradient(135deg,#fff,#e5dbff,#dffaff);z-index:20;display:grid;place-items:center;text-align:center;padding:20px}.splash h1{font-size:clamp(40px,10vw,80px);line-height:.85}.load{width:min(500px,90vw);height:18px;border:4px solid #111;border-radius:20px;overflow:hidden}.load i{display:block;width:0;height:100%;background:var(--green);transition:.1s}
+.modal{position:fixed;inset:0;background:#0008;display:none;place-items:center;z-index:30;padding:20px}.modal.show{display:grid}.modal>div{background:#fff;border:5px solid #111;border-radius:25px;padding:25px;width:min(450px,100%);box-shadow:8px 8px #111}
+.darkmode{--bg:#17171b;--ink:#fff;--card:#25252b}.darkmode header,.darkmode .bottom{background:#25252b}
+@media(max-width:700px){.stats{grid-template-columns:1fr 1fr}.grid{grid-template-columns:1fr}.options{grid-template-columns:1fr}.bottom button{padding:8px 9px}}
+</style>
+</head>
+<body>
+<div class="splash" id="splash">
+<div><div class="logo">🧩</div><h1>RANDOM<br>CHALLENGE<br>GENERATOR</h1><p>WELCOME TO YOUR CHALLENGE WORLD</p><b>CHALLENGE YOURSELF. BUILD YOUR SCORE.</b><p>💻 Coding　🧠 Brain　💬 Communication　🏃 Fitness　🌍 GK</p><div class="load"><i id="load"></i></div><small>LOADING 150+ CHALLENGES...</small></div>
+</div>
+<header><div>🧩 RANDOM CHALLENGE<small>CHALLENGE YOURSELF. BUILD YOUR SCORE.</small></div><button class="btn" onclick="toggleDark()">🌙</button></header>
+<main id="app"></main>
+<nav class="bottom"><button onclick="home()">🎲<span>Play</span></button><button onclick="categories()">▦<span>Hub</span></button><button onclick="historyPage()">◷<span>History</span></button><button onclick="achievements()">🏆<span>Awards</span></button><button onclick="profile()">👤<span>Profile</span></button></nav>
+<div class="modal" id="modal"><div id="modalText"></div></div>
+<script>
+const app=document.getElementById("app");
+const categoriesData=[
+["💻","CODING","5 Subcategories • 3 Levels • 30 Questions", "cyan"],
+["🧠","BRAIN & LOGIC","3 Levels • 30 Questions","purple"],
+["💬","COMMUNICATION","3 Levels • 30 Questions","orange"],
+["🏃","FITNESS & WELLNESS","3 Levels • 30 Questions","green"],
+["🌍","GENERAL KNOWLEDGE","3 Levels • 30 Questions","yellow"]];
+const questions=[
+["🧠 SPEED CHALLENGE","What is the next number? 2, 4, 6, 8, ?","10","12","14","16","A","The sequence increases by 2."],
+["💻 PYTHON","Which function displays text in Python?","print()","show()","echo()","display()","A","print() displays output."],
+["🌍 GENERAL KNOWLEDGE","Which planet is known as the Red Planet?","Mars","Venus","Jupiter","Mercury","A","Mars is called the Red Planet."],
+["💬 COMMUNICATION","What is a polite response to 'Thank you'?","Whatever.","You're welcome.","No.","Go away.","B","You're welcome is appropriate."],
+["🏃 FITNESS","What is useful before exercise?","A gentle warm-up","No preparation","Holding your breath","Extreme exercise","A","A gentle warm-up prepares the body."],
+["💻 HTML","Which tag creates a paragraph?","<para>","<p>","<text>","<pg>","B","The p element creates a paragraph."],
+["💻 CSS","Which property changes text color?","font-color","color","text-color","foreground","B","The color property changes text color."],
+["💻 JAVASCRIPT","Which keyword declares a constant?","fixed","const","constant","static","B","const declares a constant binding."],
+["🧠 LOGIC","A clock shows 3:00. What is the angle between the hands?","30°","60°","90°","180°","C","The angle is 90 degrees."],
+["🌍 SCIENCE","What gas do plants use in photosynthesis?","Oxygen","Carbon dioxide","Helium","Hydrogen","B","Plants use carbon dioxide."]];
+
+let stats=JSON.parse(localStorage.rcgStats||'{"credits":0,"score":0,"xp":0,"streak":0,"completed":0,"correct":0,"wrong":0}');
+let history=JSON.parse(localStorage.rcgHistory||"[]");
+
+function save(){localStorage.rcgStats=JSON.stringify(stats);localStorage.rcgHistory=JSON.stringify(history)}
+function home(){
+app.innerHTML=`<section class="hero"><span class="tag">🎲 RANDOM CHALLENGE</span><h1>CHALLENGE YOURSELF.<br>BUILD YOUR SCORE.</h1><p>Generate a different challenge every time. Complete challenges, earn credits and build your streak.</p><button class="btn dark" onclick="randomChallenge()">🎲 ROLL THE DICE</button></section>
+<div class="stats"><div class="card stat">💰<b>${stats.credits}</b>Credits</div><div class="card stat">⭐<b>${stats.score}</b>Daily Score</div><div class="card stat">🔥<b>${stats.streak}</b>Day Streak</div><div class="card stat">⚡<b>${stats.xp}</b>XP</div></div>
+<h2>SKILL CATEGORIES</h2><p>Pick a track to level up your abilities.</p><div class="grid">${categoriesData.map((c,i)=>`<article class="card cat"><h2>${c[0]} ${c[1]}</h2><p>${c[2]}</p><div class="progress"><i style="width:${Math.min(100,stats.completed*2)}%"></i></div><p>Progress ${Math.min(100,stats.completed*2)}%</p><button class="btn" onclick="levels(${i})">CONTINUE →</button></article>`).join("")}</div>`;
+}
+function categories(){home()}
+function levels(cid){let name=categoriesData[cid][1];app.innerHTML=`<button class="btn" onclick="home()">← Back</button><h1>${categoriesData[cid][0]} ${name}</h1><p>Choose a level.</p><div class="grid">${[1,2,3].map(l=>`<article class="card"><span class="tag">${l===1?"✓ UNLOCKED":"🔒 LOCKED"}</span><h2>LEVEL ${l} — ${["STARTER","CHALLENGER","MASTER"][l-1]}</h2><p>${["BEGINNER","INTERMEDIATE","ADVANCED"][l-1]} • 10 QUESTIONS</p><button class="btn ${l>1?"":"dark"}" ${l>1?"disabled":""} onclick="question()">START LEVEL</button></article>`).join("")}</div>`}
+function randomChallenge(){let q=questions[Math.floor(Math.random()*questions.length)];showQuestion(q)}
+function question(){showQuestion(questions[Math.floor(Math.random()*questions.length)])}
+function showQuestion(q){
+app.innerHTML=`<div class="question"><div><span class="tag">ACTIVITY 1 OF 10</span><span class="tag">🔥 10 PTS</span></div><div class="progress"><i style="width:10%"></i></div><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 400'%3E%3Crect width='800' height='400' rx='30' fill='%23b99aff'/%3E%3Ccircle cx='650' cy='110' r='65' fill='%23ffe06b'/%3E%3Crect x='100' y='100' width='500' height='220' rx='30' fill='white' stroke='%23111' stroke-width='10'/%3E%3Ctext x='180' y='240' font-size='90' font-family='Arial' font-weight='bold'%3E%3F%3C/text%3E%3C/svg%3E"><span class="tag">${q[0]}</span><h2>${q[1]}</h2><div class="options">${["A","B","C","D"].map((x,i)=>`<button class="option" onclick="answer('${x}','${q[6]}',this,'${q[7]}')">${x}. ${q[i+2]}</button>`).join("")}</div><div id="feedback"></div></div>`;
+}
+function answer(ch,correct,btn,explanation){document.querySelectorAll(".option").forEach(x=>x.disabled=true);let ok=ch===correct;btn.classList.add(ok?"correct":"wrong");stats.completed++;if(ok){stats.correct++;stats.credits+=10;stats.score+=10;stats.xp+=10}else stats.wrong++;history.unshift({question:btn.parentElement.previousElementSibling?.textContent||"Challenge",correct:ok,date:new Date().toLocaleString(),credits:ok?10:0});save();document.getElementById("feedback").innerHTML=`<div class="card" style="margin-top:15px"><h2>${ok?"✓ CORRECT!":"✕ WRONG"}</h2><p>Correct Answer: ${correct}</p><p>${explanation}</p><p>${ok?"+10 Credits • +10 Points":"No credits this time"}</p><button class="btn dark" onclick="home()">BACK TO HUB</button></div>`}
+function historyPage(){app.innerHTML=`<h1>📜 CHALLENGE HISTORY</h1>${history.length?history.map(x=>`<article class="card"><b>${x.correct?"✓ Correct":"✕ Wrong"}</b><p>${x.question}</p><small>${x.date} • +${x.credits} credits</small></article>`).join(""):`<div class="card"><h2>No challenges completed yet.</h2><p>Complete a challenge and it will appear here.</p></div>`}`}
+function achievements(){let a=[["FIRST STEP",stats.completed>=1],["100 CREDITS",stats.credits>=100],["PERFECT 10",stats.correct>=10],["ALL-ROUND CHALLENGER",stats.completed>=5],["ULTIMATE CHALLENGER",stats.completed>=30]];app.innerHTML=`<h1>🏆 ACHIEVEMENTS</h1><div class="grid">${a.map(x=>`<article class="card"><h2>${x[1]?"🏆":"🔒"} ${x[0]}</h2><b>${x[1]?"✓ UNLOCKED":"🔒 LOCKED"}</b></article>`).join("")}</div>`}
+function profile(){app.innerHTML=`<h1>👤 PROFILE</h1><div class="hero"><h1>CHALLENGER</h1><p>PLAYER LEVEL ${Math.min(5,1+Math.floor(stats.xp/250))}</p><div class="progress"><i style="width:${(stats.xp%250)/2.5}%"></i></div><p>${stats.xp%250}/250 XP</p></div><div class="stats"><div class="card stat">💰<b>${stats.credits}</b>Credits</div><div class="card stat">⚡<b>${stats.xp}</b>XP</div><div class="card stat">🎯<b>${stats.completed?Math.round(stats.correct/stats.completed*100):0}%</b>Accuracy</div><div class="card stat">🔥<b>${stats.streak}</b>Streak</div></div><br><button class="btn" onclick="resetAll()">⚙ RESET PROGRESS</button>`}
+function resetAll(){if(confirm("Are you sure? This action cannot be undone.")){stats={credits:0,score:0,xp:0,streak:0,completed:0,correct:0,wrong:0};history=[];save();home()}}
+function toggleDark(){document.body.classList.toggle("darkmode");localStorage.theme=document.body.classList.contains("darkmode")?"dark":"light"}
+if(localStorage.theme==="dark")document.body.classList.add("darkmode");
+let n=0;let timer=setInterval(()=>{n+=5;document.getElementById("load").style.width=n+"%";if(n>=100){clearInterval(timer);document.getElementById("splash").style.display="none";home()}},55);
+</script>
+</body>
+</html>
